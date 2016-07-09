@@ -38,6 +38,7 @@ public class ZookeeperClient {
     private boolean isMaster;
 
     public void setMaster(boolean master) {
+        System.out.println("setMaster:" + master);
         isMaster = master;
     }
 
@@ -57,7 +58,7 @@ public class ZookeeperClient {
                         String firstRegisteredIp = getFirstRegisteredIp();
                         if (!isMaster && firstRegisteredIp.equals(localIP)) {
                             // 如果当前主机还不是master，且最先注册完成的就是当前主机，则认为被选举为master了
-                            // TODO:绑定masterIp到当前主机
+                            // 绑定masterIp到当前主机
                             BindMasterIPHelper.upMasterIP(localIFace, localIP, masterIP);
                         }
                         // 考虑重连情况下，当前节点已经不是master了
@@ -91,6 +92,7 @@ public class ZookeeperClient {
                         BindMasterIPHelper.downRemoteMasterIP(remoteIFace, remoteIP);
                         // 并绑定master ip到当前节点
                         BindMasterIPHelper.upMasterIP(localIFace, localIP, masterIP);
+                        setMaster(true);
                     }
                 }
             }
@@ -110,7 +112,7 @@ public class ZookeeperClient {
             List<String> children = client.getChildren().forPath(parentPath);
             // 将children进行排序，获取路径值最小的节点，也就是最近一次注册的节点
             Collections.sort(children);
-            return new String(client.getData().forPath(parentPath + '/'+ children.get(0)));
+            return new String(client.getData().forPath(parentPath + '/'+ children.get(0))).split(":")[1];
         } catch (Exception e) {
             e.printStackTrace();
         }
