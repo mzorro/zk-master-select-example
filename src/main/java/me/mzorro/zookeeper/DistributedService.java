@@ -12,19 +12,20 @@ import java.util.concurrent.CountDownLatch;
  */
 public class DistributedService {
     public static void main(String[] args) {
-        if (args.length == 2) {
+        if (args.length == 4) {
+            String localIFace = args[0];
             // 当前主机的本地IP
-            String localIP = args[0];
+            String localIP = args[1];
             // 对外开放的masterIp
-            String masterIP = args[1];
+            String masterIP = args[2];
             // zookeeper的地址
-            String zkAddress = args[2];
+            String zkAddress = args[3];
 
             // 用Latch来控制程序结束
             CountDownLatch stopLatch = new CountDownLatch(1);
 
             // 启动ZookeeperClient
-            ZookeeperClient client = new ZookeeperClient(localIP, masterIP, zkAddress);
+            ZookeeperClient client = new ZookeeperClient(localIFace, localIP, masterIP, zkAddress);
             client.start(stopLatch);
 
             // 启动NettyTimeServer
@@ -33,7 +34,7 @@ public class DistributedService {
             // 停止服务，让出master权
             stopLatch.countDown();
         } else {
-            System.out.println("usage: start-server.sh [local-ip] [master-ip] [zookeeper-address]");
+            System.out.println("usage: java .. [local-interface] [local-ip] [master-ip] [zookeeper-address]");
         }
     }
 }

@@ -35,12 +35,14 @@ public class BindMasterIPHelper {
 
     }
 
-    public static void upMasterIP(String masterIP) {
-        runCommond("./up-master-ip.sh");
+    public static void upMasterIP(String localIFace, String localIP, String masterIP) {
+        runCommond(String.format("ssh -l root %s \"/sbin/ifconfig %s:0 %s broadcast %s netmask 255.255.255.255 up\"",
+                localIP, localIFace, masterIP, masterIP));
     }
 
-    public static void downRemoteMasterIP(String remoteIP, String masterIP) {
-
+    public static void downRemoteMasterIP(String remoteIFace, String remoteIP) {
+        runCommond(String.format("ssh -l root %s \"/sbin/ifconfig %s:0 down\"",
+                remoteIP, remoteIFace));
     }
 
     public static void main(String[] args) {
