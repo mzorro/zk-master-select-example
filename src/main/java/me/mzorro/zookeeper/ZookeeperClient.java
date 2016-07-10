@@ -14,6 +14,7 @@ import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -77,7 +78,7 @@ public class ZookeeperClient {
         client.start();
 
         // 监听parentPath下的子节点变化，不在本地进行缓存
-        PathChildrenCache childrenCache = new PathChildrenCache(client, parentPath, false);
+        PathChildrenCache childrenCache = new PathChildrenCache(client, parentPath, true);
         childrenCache.getListenable().addListener(new PathChildrenCacheListener() {
             public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
                 if (event.getType() == PathChildrenCacheEvent.Type.CHILD_REMOVED) {
@@ -100,6 +101,17 @@ public class ZookeeperClient {
         try {
             childrenCache.start();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 等待服务停止，断开连接
+        try {
+            stopLatch.await();
+            childrenCache.close();
+            client.close();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
