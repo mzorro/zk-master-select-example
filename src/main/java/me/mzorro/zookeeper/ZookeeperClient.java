@@ -14,10 +14,8 @@ import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 public class ZookeeperClient {
     private String localIFace;
@@ -43,7 +41,7 @@ public class ZookeeperClient {
         isMaster = master;
     }
 
-    public void start(final CountDownLatch stopLatch) {
+    public void start() {
         client = CuratorFrameworkFactory.newClient(zkAddress, new RetryNTimes(5, 1000));
         client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
@@ -101,17 +99,6 @@ public class ZookeeperClient {
         try {
             childrenCache.start();
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 等待服务停止，断开连接
-        try {
-            stopLatch.await();
-            childrenCache.close();
-            client.close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
